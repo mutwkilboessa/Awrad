@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>معاهدة - إدارة الأوراد</title>
+<meta name="theme-color" content="#1B7A5C">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="معاهدة">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    background: #F7F5F0;
+    color: #1F2937;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #topbar {
+    position: sticky; top: 0; z-index: 10;
+    background: #1B7A5C; color: #fff;
+    padding: 14px 16px calc(14px + env(safe-area-inset-top)) 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: max(14px, env(safe-area-inset-top));
+  }
+  #topbar h1 { font-size: 18px; margin: 0; font-weight: 700; }
+  #installBtn {
+    background: rgba(255,255,255,0.18); color: #fff; border: none;
+    padding: 8px 12px; border-radius: 20px; font-size: 13px;
+    font-family: inherit; cursor: pointer;
+  }
+  #installBtn.hidden { display: none; }
+  #app { padding: 16px 16px 90px 16px; max-width: 560px; margin: 0 auto; }
+  .page { display: flex; flex-direction: column; gap: 12px; }
+  .section-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .empty { color: #9CA3AF; text-align: center; padding: 40px 10px; }
+
+  .task-card {
+    background: #fff; border-radius: 14px; padding: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .task-top { display: flex; justify-content: space-between; align-items: center; }
+  .task-check { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+  .task-check input { width: 20px; height: 20px; accent-color: #1B7A5C; }
+  .task-range { color: #4B5563; margin-top: 6px; font-size: 14px; }
+  .task-meta { color: #9CA3AF; font-size: 12px; margin-top: 4px; }
+  .task-note {
+    width: 100%; margin-top: 8px; border: 1px solid #E5E7EB; border-radius: 10px;
+    padding: 8px; font-family: inherit; font-size: 13px; resize: none; min-height: 36px;
+  }
+
+  .plan-card { background: #fff; border-radius: 14px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .plan-head { display: flex; justify-content: space-between; align-items: center; padding-right: 10px; }
+  .plan-title { font-weight: 700; font-size: 16px; }
+  .icon-btn { background: none; border: none; font-size: 16px; cursor: pointer; }
+  .plan-range, .plan-days, .plan-mode { color: #6B7280; font-size: 13px; margin-top: 4px; }
+  .progress-bar { background: #F1F1EC; height: 8px; border-radius: 6px; margin-top: 10px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 6px; }
+  .progress-label { font-size: 12px; color: #6B7280; margin-top: 4px; }
+
+  label { font-size: 13px; font-weight: 600; color: #374151; margin-top: 6px; }
+  input[type=text], input[type=number], select {
+    width: 100%; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: 10px;
+    font-family: inherit; font-size: 14px; background: #fff; margin-top: 4px;
+  }
+  .row2 { display: flex; gap: 10px; }
+  .row2 > div { flex: 1; }
+  .hint { font-size: 12px; color: #9CA3AF; }
+
+  .chips-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .colordot { width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
+  .colordot.sel { border-color: #1F2937; }
+  .iconbtn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid #E5E7EB; background: #fff; font-size: 18px; cursor: pointer; }
+  .iconbtn.sel { border-color: #1B7A5C; background: #EAF6F1; }
+  .daychip { padding: 8px 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: #fff; font-family: inherit; font-size: 13px; cursor: pointer; }
+  .daychip.on { background: #1B7A5C; color: #fff; border-color: #1B7A5C; }
+
+  .segmented { display: flex; border-radius: 10px; overflow: hidden; border: 1px solid #E5E7EB; }
+  .segmented button { flex: 1; padding: 10px; border: none; background: #fff; font-family: inherit; font-size: 13px; cursor: pointer; }
+  .segmented button.on { background: #1B7A5C; color: #fff; }
+
+  .primary-btn {
+    margin-top: 14px; background: #1B7A5C; color: #fff; border: none; padding: 14px;
+    border-radius: 12px; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer;
+  }
+
+  #bottomnav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #fff; border-top: 1px solid #EEE;
+    display: flex; padding-bottom: env(safe-area-inset-bottom);
+    z-index: 10;
+  }
+  .navbtn {
+    flex: 1; background: none; border: none; padding: 10px 4px 8px 4px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    font-family: inherit; font-size: 11px; color: #9CA3AF; cursor: pointer;
+  }
+  .navbtn .ic { font-size: 20px; }
+  .navbtn.active { color: #1B7A5C; }
+
+  /* التنقل بين الأيام */
+  .daynav {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #fff; border-radius: 14px; padding: 10px 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 4px;
+  }
+  .daynav-btn {
+    width: 40px; height: 40px; border-radius: 10px; border: none;
+    background: #F1F1EC; color: #1B7A5C; font-size: 20px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .daynav-btn:disabled { opacity: 0.3; cursor: default; }
+  .daynav-center { text-align: center; flex: 1; }
+  .daynav-label { font-weight: 700; font-size: 15px; color: #1B7A5C; }
+  .daynav-date { font-size: 12px; color: #6B7280; margin-top: 2px; }
+  .daynav-time { font-size: 12px; color: #9CA3AF; margin-top: 2px; direction: ltr; }
+
+  /* الأيقونات SVG */
+  .icon-wrap svg, .task-icon svg { width: 18px; height: 18px; vertical-align: -3px; }
+  .task-icon { display: inline-flex; align-items: center; margin-left: 4px; }
+  .task-name { display: inline-flex; align-items: center; gap: 4px; }
+  .plan-title { display: flex; align-items: center; gap: 6px; }
+  .plan-title svg { width: 18px; height: 18px; }
+
+  .iconbtn { width: 44px; height: 44px; border-radius: 10px; border: 1px solid #E5E7EB; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #4B5563; }
+  .iconbtn svg { width: 20px; height: 20px; }
+  .iconbtn.sel { border-color: #1B7A5C; background: #EAF6F1; color: #1B7A5C; }
+
+  /* رقاقات طريقة تحديد الورد */
+  .method-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .methodchip {
+    padding: 10px 4px; border-radius: 10px; border: 1px solid #E5E7EB; background: #fff;
+    font-family: inherit; font-size: 13px; cursor: pointer;
+  }
+  .methodchip.on { background: #1B7A5C; color: #fff; border-color: #1B7A5C; }
+
+  /* عداد الخطوة (Stepper) */
+  .stepper { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+  .step-btn {
+    width: 40px; height: 40px; border-radius: 10px; border: 1px solid #E5E7EB; background: #F7F5F0;
+    font-size: 20px; color: #1B7A5C; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .step-val { min-width: 44px; text-align: center; font-weight: 700; font-size: 16px; }
+</style>
+</head>
+<body>
+  <div id="topbar">
+    <h1>📖 معاهدة</h1>
+    <button id="installBtn" class="hidden" onclick="triggerInstall()">⬇️ تثبيت التطبيق</button>
+  </div>
+
+  <div id="app"></div>
+
+  <div id="bottomnav">
+    <button class="navbtn active" data-tab="today"><span class="ic">🏠</span>اليوم</button>
+    <button class="navbtn" data-tab="plans"><span class="ic">📋</span>الأوراد</button>
+    <button class="navbtn" data-tab="new"><span class="ic">➕</span>جديد</button>
+  </div>
+
+  <script src="./mushaf-data.js"></script>
+  <script src="./icons.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
